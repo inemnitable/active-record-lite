@@ -65,7 +65,8 @@ class SQLObject < MassObject
 
   #find_by_arbitary_attribute
   def self.method_missing(method_name, *args)
-    super unless method_name.start_with("find_by_")
+    method_name = method_name.to_s
+    super unless method_name.start_with?("find_by_")
     attr_name = method_name[8..-1]
     attr_value = args.first
     results = DBConnection.execute(<<-SQL, attr_value)

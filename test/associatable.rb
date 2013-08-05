@@ -35,3 +35,4 @@ p human.cats
 p human.house
 
 p cat.house
+p Cat.find_by_name("Gizmo")
