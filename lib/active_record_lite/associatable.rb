@@ -56,7 +56,7 @@ module Associatable
       FROM #{aps.other_table}
       WHERE #{aps.other_table}.#{aps.primary_key} = ?
       SQL
-      aps.other_class.parse_all(query_result)
+      aps.other_class.parse_all(query_result).first
     end
   end
 
@@ -75,10 +75,9 @@ module Associatable
   end
 
   def has_one_through(name, assoc1, assoc2)
-    params1 = assoc_params[assoc1]
-    params2 = params1.other_class.assoc_params[assoc2]
-
     define_method(name) do
+      params1 = self.class.assoc_params[assoc1]
+      params2 = params1.other_class.assoc_params[assoc2]
       query_result = DBConnection.execute(<<-SQL, self.send(params1.foreign_key))
       SELECT #{params2.other_table}.*
       FROM #{params2.other_table}
@@ -87,6 +86,8 @@ module Associatable
          #{params1.other_table}.#{params2.foreign_key}
       WHERE #{params1.other_table}.#{params1.primary_key} = ?
       SQL
+
+      params2.other_class.parse_all(query_result).first
     end
   end
 end
