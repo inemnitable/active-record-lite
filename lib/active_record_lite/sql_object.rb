@@ -61,4 +61,16 @@ class SQLObject < MassObject
   def attribute_values
     self.class.attributes.map { |attribute| send(attribute) }
   end
+
+
+  #find_by_arbitary_attribute
+  def self.method_missing(method_name, *args)
+    super unless method_name.start_with("find_by_")
+    attr_name = method_name[8..-1]
+    attr_value = args.first
+    results = DBConnection.execute(<<-SQL, attr_value)
+    SELECT * FROM #{table_name} WHERE #{attr_name} = ?
+    SQL
+    parse_all(results)
+  end
 end
