@@ -19,14 +19,12 @@ class Relation
     @@result_cache[[@sql_fragments, @values]] = ret
   end
 
-  def initialize(values = [], fragments = {})
-    Binding.of_caller do |b|
-      @result_cache = nil
-      @sql_fragments = fragments
-      @sql_fragments[:select] ||= "SELECT #{b[:table_name]}.*"
-      @sql_fragments[:from] ||= "FROM #{b[:table_name]}"
-      @values = values
-    end
+  def initialize(caller, values = [], fragments = {})
+    @result_cache = nil
+    @sql_fragments = fragments
+    @sql_fragments[:select] ||= "SELECT #{caller.table_name}.*"
+    @sql_fragments[:from] ||= "FROM #{caller.table_name}"
+    @values = values
   end
 
   [:select, :from, :where, :joins].each do |method_name|
