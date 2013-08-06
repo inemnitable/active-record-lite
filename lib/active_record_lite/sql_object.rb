@@ -7,6 +7,7 @@ require 'active_support/inflector'
 class SQLObject < MassObject
   extend Searchable
   extend Associatable
+  extend Relation
 
   def self.set_table_name(table_name = self.to_s.underscore)
     @table_name = table_name
@@ -17,17 +18,21 @@ class SQLObject < MassObject
   end
 
   def self.all
-    query_result = DBConnection.execute(<<-SQL)
-    SELECT * FROM #{table_name}
-    SQL
+    relation = Relation.new(self)
 
-    parse_all(query_result)
+    # query_result = DBConnection.execute(<<-SQL)
+#     SELECT * FROM #{table_name}
+#     SQL
+    relation.execute.first
   end
 
   def self.find(id)
-    new(DBConnection.execute(<<-SQL, id).first)
-    SELECT * FROM #{table_name} WHERE id = ?
-    SQL
+    relation = Relation.new(self).where("id = ?", id)
+
+    # new(DBConnection.execute(<<-SQL, id).first)
+#     SELECT * FROM #{table_name} WHERE id = ?
+#     SQL
+    relation.execute
   end
 
   def create

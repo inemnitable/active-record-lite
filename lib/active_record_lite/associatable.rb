@@ -51,12 +51,18 @@ module Associatable
     assoc_params[name] = aps
 
     define_method(name) do
-      query_result = DBConnection.execute(<<-SQL, self.send(aps.foreign_key))
-      SELECT *
-      FROM #{aps.other_table}
-      WHERE #{aps.other_table}.#{aps.primary_key} = ?
-      SQL
-      aps.other_class.parse_all(query_result).first
+      relation = Relation.new([self.send(aps.foreign_key)],
+        :select => "SELECT *"
+        :from => "FROM #{aps.other_table}"
+        :where => "WHERE #{aps.other_table}.#{aps.primary_key} = ?"
+      )
+      relation.get_result.first
+      # query_result = DBConnection.execute(<<-SQL, self.send(aps.foreign_key))
+#       SELECT *
+#       FROM #{aps.other_table}
+#       WHERE #{aps.other_table}.#{aps.primary_key} = ?
+#       SQL
+#       aps.other_class.parse_all(query_result).first
     end
   end
 
@@ -89,5 +95,9 @@ module Associatable
 
       params2.other_class.parse_all(query_result).first
     end
+  end
+
+  def includes(assoc)
+
   end
 end
